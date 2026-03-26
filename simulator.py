@@ -1,39 +1,44 @@
-from utils import register_map, initialize_registers, update_flags
+from utils import registers, flags
 
-def simulate(ymc_lines, machine_code):
-    reg = initialize_registers()
-    flags = {"ZF":0, "SF":0, "OF":0, "CF":0}
+def simulate(ymc_asm, machine_code):
+    reg = {r:0 for r in registers}
+    flags_state = {f:0 for f in flags}
     results = []
-    
-    for addr, line in enumerate(ymc_lines):
-        parts = line.replace(",", "").split()
-        modified_regs = {}
-        modified_flags = {}
-        if not parts or parts[0].startswith("#"):
-            results.append([line, addr, line, machine_code[addr], modified_regs, modified_flags])
-            continue
-        instr = parts[0]
-        if instr == "mov":
-            if parts[2] in reg:
-                reg[parts[1]] = reg[parts[2]]
+
+    for idx, instr in enumerate(ymc_asm):
+        parts = instr.replace(',','').split()
+        op = parts[0]
+        modified_regs, modified_flags = [], []
+
+        if op == 'mov':
+            dst, src = parts[1], parts[2]
+            if src.isdigit():
+                reg[dst] = int(src)
             else:
-                reg[parts[1]] = int(parts[2])
-            modified_regs[parts[1]] = reg[parts[1]]
-        elif instr == "add":
-            reg[parts[1]] = (reg[parts[2]] + reg[parts[3]]) % 256
-            modified_regs[parts[1]] = reg[parts[1]]
-            update_flags(reg[parts[1]], flags)
-        elif instr == "sub":
-            reg[parts[1]] = (reg[parts[2]] - reg[parts[3]]) % 256
-            modified_regs[parts[1]] = reg[parts[1]]
-            update_flags(reg[parts[1]], flags)
-        elif instr == "mult":
-            reg[parts[1]] = (reg[parts[2]] * reg[parts[3]]) % 256
-            modified_regs[parts[1]] = reg[parts[1]]
-            update_flags(reg[parts[1]], flags)
-        elif instr == "div":
-            reg[parts[1]] = (reg[parts[2]] // reg[parts[3]]) % 256
-            modified_regs[parts[1]] = reg[parts[1]]
-            update_flags(reg[parts[1]], flags)
-        results.append([line, addr, line, machine_code[addr], modified_regs.copy(), flags.copy()])
+                reg[dst] = reg[src]
+            modified_regs.append(dst)
+        elif op in ['add','sub','mult','div']:
+            dst, src1, src2 = parts[1], parts[2], parts[3]
+            if op == 'add':
+                res = reg[src1] + reg[src2]
+            elif op == 'sub':
+                res = reg[src1] - reg[src2]
+            elif op == 'mult':
+                res = reg[src1] * reg[src2]
+            elif op == 'div':
+                res = reg[src1] // (reg[src2] if reg[src2]!=0 else 1)
+            # overflow 8-bit
+            res = res % 256
+            reg[dst] = res
+            modified_regs.append(dst)
+            flags_state['ZF'] = int(res==0)
+            flags_state['SF'] = int(res>=128)
+            flags_state['OF'] = int(res>255)
+        results.append({
+            'HLC': instr,
+            'Assembly': instr,
+            'Machine': machine_code[idx],
+            'Registers': reg.copy(),
+            'Flags': flags_state.copy()
+        })
     return results

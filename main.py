@@ -1,28 +1,25 @@
-from parser import parse_hlc
-from compiler import compile_hlc_to_ymc
+from compiler import hlc_to_ymc
 from encoder import encode_ymc
 from simulator import simulate
-from utils import save_csv
+from utils import write_csv
 
 def main():
+    # Input HLC file
     with open("input.txt") as f:
-        hlc_code = [line.strip() for line in f if line.strip()]
-    
-    # 1. Parse HLC
-    hlc_lines = parse_hlc(hlc_code)
-    
-    # 2. Compile to YMC assembly
-    ymc_asm = compile_hlc_to_ymc(hlc_lines)
-    
-    # 3. Encode YMC to machine code
+        hlc_code = f.read().splitlines()
+
+    # HLC -> YMC assembly
+    ymc_asm = hlc_to_ymc(hlc_code)
+
+    # YMC assembly -> machine code
     machine_code = encode_ymc(ymc_asm)
-    
-    # 4. Simulate
+
+    # Simulate processor execution
     sim_results = simulate(ymc_asm, machine_code)
-    
-    # 5. Save CSV
-    save_csv(sim_results, "output.csv")
-    print("✅ Simulation complete. Output saved to output.csv")
+
+    # Output CSV
+    write_csv(sim_results, "output.csv")
+    print("✅ Simulation complete. CSV saved as output.csv")
 
 if __name__ == "__main__":
     main()

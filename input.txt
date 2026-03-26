@@ -1,7 +1,6 @@
 a = 5
 b = 3
 c = a + b
-d = a * b
-e = d / b
-f = c - a
-g = f + e
+x = 10
+y = 2
+z = x * y
