@@ -1,62 +1,39 @@
-def simulate(assembly):
-    regs = {'eax':0,'ebx':0,'ecx':0,'edx':0}
-    flags = {'ZF':0,'SF':0}
+from utils import register_map, initialize_registers, update_flags
 
-    pc = 0
-    output = []
-
-    while pc < len(assembly):
-        inst = assembly[pc]
-        parts = inst.split()
-        op = parts[0]
-
-        reg_change = ""
-        flag_change = ""
-
-        if op == 'mov':
-            r = parts[1].replace(',', '')
-            val = int(parts[2])
-            regs[r] = val
-            reg_change = f"{r}={val}"
-
-        elif op == 'add':
-            r,r1,r2 = parts[1].replace(',', ''), parts[2].replace(',', ''), parts[3]
-            res = regs[r1] + regs[r2]
-            regs[r] = res
-            flags['ZF'] = int(res==0)
-            flags['SF'] = int(res<0)
-            reg_change = f"{r}={res}"
-
-        elif op == 'sub':
-            r,r1,r2 = parts[1].replace(',', ''), parts[2].replace(',', ''), parts[3]
-            res = regs[r1] - regs[r2]
-            regs[r] = res
-            flags['ZF'] = int(res==0)
-            flags['SF'] = int(res<0)
-            reg_change = f"{r}={res}"
-
-        elif op == 'cmp':
-            r = parts[1].replace(',', '')
-            val = int(parts[2])
-            res = regs[r] - val
-            flags['ZF'] = int(res==0)
-            flags['SF'] = int(res<0)
-
-        elif op == 'jmp':
-            pc = int(parts[1])
+def simulate(ymc_lines, machine_code):
+    reg = initialize_registers()
+    flags = {"ZF":0, "SF":0, "OF":0, "CF":0}
+    results = []
+    
+    for addr, line in enumerate(ymc_lines):
+        parts = line.replace(",", "").split()
+        modified_regs = {}
+        modified_flags = {}
+        if not parts or parts[0].startswith("#"):
+            results.append([line, addr, line, machine_code[addr], modified_regs, modified_flags])
             continue
-
-        elif op == 'jg':
-            if flags['ZF']==0 and flags['SF']==0:
-                pc = int(parts[1])
-                continue
-
-        elif op == 'jle':
-            if flags['SF']==1 or flags['ZF']==1:
-                pc = int(parts[1])
-                continue
-
-        output.append((pc, inst, reg_change, str(flags)))
-        pc += 1
-
-    return output
+        instr = parts[0]
+        if instr == "mov":
+            if parts[2] in reg:
+                reg[parts[1]] = reg[parts[2]]
+            else:
+                reg[parts[1]] = int(parts[2])
+            modified_regs[parts[1]] = reg[parts[1]]
+        elif instr == "add":
+            reg[parts[1]] = (reg[parts[2]] + reg[parts[3]]) % 256
+            modified_regs[parts[1]] = reg[parts[1]]
+            update_flags(reg[parts[1]], flags)
+        elif instr == "sub":
+            reg[parts[1]] = (reg[parts[2]] - reg[parts[3]]) % 256
+            modified_regs[parts[1]] = reg[parts[1]]
+            update_flags(reg[parts[1]], flags)
+        elif instr == "mult":
+            reg[parts[1]] = (reg[parts[2]] * reg[parts[3]]) % 256
+            modified_regs[parts[1]] = reg[parts[1]]
+            update_flags(reg[parts[1]], flags)
+        elif instr == "div":
+            reg[parts[1]] = (reg[parts[2]] // reg[parts[3]]) % 256
+            modified_regs[parts[1]] = reg[parts[1]]
+            update_flags(reg[parts[1]], flags)
+        results.append([line, addr, line, machine_code[addr], modified_regs.copy(), flags.copy()])
+    return results

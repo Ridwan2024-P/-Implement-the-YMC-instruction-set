@@ -1,11 +1,6 @@
-def parse_hlc(file_path):
-    with open(file_path, 'r') as f:
-        lines = f.readlines()
-
-    cleaned = []
+def parse_hlc(lines):
+    parsed = []
     for line in lines:
-        line = line.strip()
-        if line:
-            cleaned.append(line)
-
-    return cleaned
+        if line and not line.startswith("#"):
+            parsed.append(line)
+    return parsed

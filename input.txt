@@ -1,6 +1,7 @@
 a = 5
-b = 2
-
-while a > 0
-    b = b + a
-    a = a - 1
+b = 3
+c = a + b
+d = a * b
+e = d / b
+f = c - a
+g = f + e

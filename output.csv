@@ -1,5 +1,8 @@
-Address,Assembly,Registers,Flags
-0,"mov eax, 3",eax=3,
-1,"mov ebx, 5",ebx=5,
-2,"add ecx, eax, ebx",ecx=8,ZF=0 SF=0
-3,"sub ecx, ecx, eax",ecx=5,ZF=0 SF=0
+HLC,Address,YMC Assembly,Machine Code,Registers,Flags
+"mov a, 5",0,"mov a, 5",10 00,{'a': 5},"{'ZF': 0, 'SF': 0, 'OF': 0, 'CF': 0}"
+"mov b, 3",1,"mov b, 3",10 00,{'b': 3},"{'ZF': 0, 'SF': 0, 'OF': 0, 'CF': 0}"
+"add c, a, b",2,"add c, a, b",20 00,{'c': 8},"{'ZF': 0, 'SF': 0, 'OF': 0, 'CF': 0}"
+"mult d, a, b",3,"mult d, a, b",22 00,{'d': 15},"{'ZF': 0, 'SF': 0, 'OF': 0, 'CF': 0}"
+"div e, d, b",4,"div e, d, b",23 00,{'e': 5},"{'ZF': 0, 'SF': 0, 'OF': 0, 'CF': 0}"
+"mov f, c - a",5,"mov f, c - a",10 00,{'f': 8},"{'ZF': 0, 'SF': 0, 'OF': 0, 'CF': 0}"
+"add g, f, e",6,"add g, f, e",20 00,{'g': 13},"{'ZF': 0, 'SF': 0, 'OF': 0, 'CF': 0}"
