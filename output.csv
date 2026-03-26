@@ -1,0 +1,5 @@
+Address,Assembly,Registers,Flags
+0,"mov eax, 3",eax=3,
+1,"mov ebx, 5",ebx=5,
+2,"add ecx, eax, ebx",ecx=8,ZF=0 SF=0
+3,"sub ecx, ecx, eax",ecx=5,ZF=0 SF=0
