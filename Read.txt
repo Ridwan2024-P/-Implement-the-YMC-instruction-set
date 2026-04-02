@@ -1,0 +1,8 @@
+a=3;
+c=5;
+d=a+c;
+HLC=High Level code
+
+mov eax,3
+00111001A
+CSV file output dekhabe
