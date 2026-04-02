@@ -5,7 +5,7 @@ def resolve_labels(ymc_asm):
 
     for line in ymc_asm:
         if ":" in line:
-            label = line.replace(":", "")
+            label = line.replace(":", "").strip()
             label_map[label] = idx
         else:
             new_code.append(line)
@@ -14,9 +14,12 @@ def resolve_labels(ymc_asm):
     final_code = []
     for line in new_code:
         parts = line.split()
-        if parts[0] in ['jmp','jg','jge','jl','jle','je','jne']:
+        if parts and parts[0] in ['jmp','jg','jge','jl','jle','je','jne']:
             label = parts[1]
-            final_code.append(f"{parts[0]} {label_map[label]}")
+            if label in label_map:
+                final_code.append(f"{parts[0]} {label_map[label]}")
+            else:
+                final_code.append(line)
         else:
             final_code.append(line)
     return final_code

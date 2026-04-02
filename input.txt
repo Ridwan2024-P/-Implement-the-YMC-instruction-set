@@ -1,9 +1,11 @@
+a, b, c
+x, y, z
 a = 10
 b = 5
 c = 2
-d = addsub(a, b)
-e = subadd(b, c)
-f = multdiv(a, c)
+x = addsub(a, b)
+y = subadd(b, c)
+z = multdiv(a, c)
 if a > b
 x = 10
 while a > b
