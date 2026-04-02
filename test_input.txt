@@ -1,0 +1,7 @@
+a, b, c
+x, y, z
+a = 10
+b = 3
+while a > b
+
+a = a - b

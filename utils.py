@@ -3,12 +3,12 @@ import csv
 registers = ['eax','ebx','ecx','edx']
 reg_codes = { 'eax': '00', 'ebx': '01', 'ecx': '02', 'edx': '03' }
 
-# Variable tracking
-var_map = {}  # variable -> register mapping
-var_types = {}  # variable -> 'unsigned' or 'signed'
-var_initialized = {}  # track if variable has value
 
-# Allowed variables (per project requirements)
+var_map = {}  
+var_types = {}  
+var_initialized = {} 
+
+
 unsigned_vars_allowed = {'a', 'b', 'c'}
 signed_vars_allowed = {'x', 'y', 'z'}
 
