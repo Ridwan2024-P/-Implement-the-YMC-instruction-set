@@ -2,8 +2,7 @@ def resolve_labels(ymc_asm):
     label_map = {}
     new_code = []
     idx = 0
-
-    # detect labels
+    # detect label addresses
     for line in ymc_asm:
         if ":" in line:
             label = line.replace(":", "")
@@ -11,8 +10,7 @@ def resolve_labels(ymc_asm):
         else:
             new_code.append(line)
             idx += 1
-
-    # replace labels
+    # replace labels with addresses
     final_code = []
     for line in new_code:
         parts = line.split()
@@ -21,5 +19,4 @@ def resolve_labels(ymc_asm):
             final_code.append(f"{parts[0]} {label_map[label]}")
         else:
             final_code.append(line)
-
     return final_code
