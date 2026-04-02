@@ -1,36 +1,46 @@
-from utils import reg_pool, var_map, memory_map
-
-def get_register(var):
-    """Get a register for a variable (spill if needed)"""
-    if var in var_map:
-        return var_map[var]
-    # free register available
-    if reg_pool:
-        reg = reg_pool.pop(0)
-        var_map[var] = reg
-        return reg
-    # spill: pick a var from var_map
-    spill_var, spill_reg = next(iter(var_map.items()))
-    memory_map[spill_var] = spill_reg
-    del var_map[spill_var]
-    var_map[var] = spill_reg
-    return spill_reg
+from utils import registers, var_map, op_codes
 
 def hlc_to_ymc(lines):
     ymc = []
     label_count = 0
+
     for line in lines:
         line = line.strip()
         if not line or line.startswith("#"):
             continue
 
-        # assignment
+        # --- Complex Arithmetic ---
+        if 'addsub' in line:
+            dest, expr = [x.strip() for x in line.split('=')]
+            args = expr[7:-1].split(',')
+            b, c = args[0].strip(), args[1].strip()
+            ymc.append(f"add {dest}, {b}, {c}")
+            ymc.append(f"sub {dest}, {dest}, {b}")
+            continue
+
+        if 'subadd' in line:
+            dest, expr = [x.strip() for x in line.split('=')]
+            args = expr[7:-1].split(',')
+            b, c = args[0].strip(), args[1].strip()
+            ymc.append(f"sub {dest}, {b}, {c}")
+            ymc.append(f"add {dest}, {dest}, {b}")
+            continue
+
+        if 'multdiv' in line:
+            dest, expr = [x.strip() for x in line.split('=')]
+            args = expr[8:-1].split(',')
+            b, c = args[0].strip(), args[1].strip()
+            ymc.append(f"mult {dest}, {b}, {c}")
+            ymc.append(f"div {dest}, {dest}, {b}")
+            continue
+
+        # --- Simple assignment ---
         if '=' in line and not any(op in line for op in ['+','-','*','/']):
             dest, right = [x.strip() for x in line.split('=')]
             ymc.append(f"mov {dest}, {right}")
             continue
 
-        # arithmetic
+        # --- Arithmetic ---
         for op in ['+','-','*','/']:
             if op in line:
                 dest, expr = [x.strip() for x in line.split('=')]
@@ -41,7 +51,7 @@ def hlc_to_ymc(lines):
                 elif op == '/': ymc.append(f"div {dest}, {left.strip()}, {right.strip()}")
                 break
 
-        # IF condition
+        # --- Conditional ---
         if line.startswith("if "):
             cond = line[3:].strip()
             for rel in ['>=','<=','>','<','==','!=']:
@@ -54,7 +64,7 @@ def hlc_to_ymc(lines):
                     label_count += 1
                     break
 
-        # WHILE loop
+        # --- Loops ---
         if line.startswith("while "):
             cond = line[6:].strip()
             start = f"LOOP_{label_count}"
